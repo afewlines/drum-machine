@@ -3,16 +3,24 @@
   export default {
     name: 'PlusMinusButtons',
     props: {
-      var: String,
       mode: String,
+      local: Boolean,
     },
     computed: {},
     methods: {
       inc() {
-        this.$parent.tryChange(this.mode, this.var, 1);
+        if (this.local) {
+          this.$emit('try-inc', this.mode);
+        } else {
+          this.$parent.$emit('try-inc', this.mode);
+        }
       },
       dec() {
-        this.$parent.tryChange(this.mode, this.var, -1);
+        if (this.local) {
+          this.$emit('try-dec', this.mode);
+        } else {
+          this.$parent.$emit('try-dec', this.mode);
+        }
       },
     },
   };
@@ -23,12 +31,12 @@
 
   <div class="btn-holder">
     <div class="btn"
-         style="float: left;"
+         style="left: 0;"
          v-on:click="dec">
       -
     </div>
     <div class="btn"
-         style="float: right;"
+         style="right: 0;"
          v-on:click="inc">
       +
     </div>
@@ -39,11 +47,13 @@
 <style scoped>
 
   .btn-holder {
-    position: relative;
+    position: absolute;
+    width: 100%;
+    top: 100%;
   }
 
   .btn {
-    position: relative;
+    position: absolute;
     width: 1em;
     height: 1em;
     margin: 0.25em 0;

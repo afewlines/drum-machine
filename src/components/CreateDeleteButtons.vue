@@ -9,10 +9,10 @@
     computed: {},
     methods: {
       create() {
-        this.$parent.tryCreate(this.mode);
+        this.$parent.$emit('try-create', this.mode);
       },
       del() {
-        this.$parent.tryDelete(this.mode);
+        this.$parent.$emit('try-delete', this.mode);
       },
     },
   };
@@ -23,12 +23,12 @@
 
   <div class="btn-holder">
     <div class="btn"
-         style="float: left; margin-left:0.25em;"
+         style="left: 0; margin-left:1.25em;"
          v-on:click="del">
       &#x2715;
     </div>
     <div class="btn"
-         style="float: right; margin-right:0.25em;"
+         style="right: 0; margin-right:1.25em;"
          v-on:click="create">
       &#x2739;
     </div>
@@ -39,11 +39,13 @@
 <style scoped>
 
   .btn-holder {
-    position: relative;
+    position: absolute;
+    width: 100%;
+    top: 100%;
   }
 
   .btn {
-    position: relative;
+    position: absolute;
     width: 0.75em;
     height: 0.75em;
     margin: 0.375em 0;
