@@ -1,0 +1,10 @@
+hey guys.
+
+
+the stuff goes here.
+
+
+running this in the same directory as 'npm run serve' should show the files.
+only if u did it right tho.
+
+`ls public/samples/ELPHNT_*/*.mp3`

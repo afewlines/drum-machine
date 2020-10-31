@@ -2,15 +2,11 @@
 
   // import components that do things
   import PlusMinusButtons from '@/components/PlusMinusButtons.vue';
-  import CreateDeleteButtons from '@/components/CreateDeleteButtons.vue';
-  import TransportButtons from '@/components/TransportButtons.vue';
 
   export default {
-    name: 'MainPanel',
+    name: 'SequencerPanel',
     components: {
-      PlusMinusButtons,
-      CreateDeleteButtons,
-      TransportButtons,
+      // PlusMinusButtons,
     },
     data() {
       return {
@@ -20,10 +16,9 @@
         offset: 0,
       };
     },
+    mounted() {},
     computed: {
       trackSel: {
-        // THIS ONE GOES BOTH WAYS
-        // isn't this cool????
         get: function() {
           // get index of selected track
           return this.$parent.selectedTrack;
@@ -34,7 +29,6 @@
         },
       },
       patternSel: {
-        // another 2-way
         get: function() {
           // get index of selected pattern
           return this.$parent.selectedPattern;
@@ -44,20 +38,9 @@
           this.$emit('try-set', { mode: 'pattern', value: x });
         },
       },
-      tracksCount() {
-        // # of tracks
-        return this.$parent.trackCount;
-      },
-      tracksAll() {
-        // all the tracks!
-        return this.$parent.tracks;
-      },
       trackReal() {
+        // current track object
         return this.$parent.track;
-      },
-      patternsCount() {
-        // # of patterns in track
-        return this.trackReal.patterns.length;
       },
       previewRows() {
         // all rows that can be displayed
@@ -71,10 +54,9 @@
         }
         return out;
       },
-      phspot(){
-        return this.$parent.stopped?0:(100*this.$parent.transportLoopSpot/this.$parent.transportLoopDuration);
-      }
+
     },
+    methods: {},
   };
 
 </script>
@@ -83,36 +65,6 @@
 
   <div class="container">
     <div class="panel">
-      <!-- LEFT, INFORMATION/TRANSPORT COLUMN -->
-      <div id="info" class="column w25">
-        <div style="flex-flow: row; height: 6em;">
-          <!-- TRACK -->
-          <div class="box arrows" style="float: left; margin-left: 0.75em;">
-            <h3 style="left: -1.35em;">TRACK</h3>
-            <input type="number"
-                   class="number"
-                   style="font-size: 2.5em;"
-                   v-model.lazy.number="trackSel">
-            <PlusMinusButtons mode="track" />
-            <CreateDeleteButtons mode="track" />
-          </div>
-          <!-- PATTERN -->
-          <div class="box arrows" style="float: right; margin-right: 0.75em;">
-            <h3 style="right: -1.35em;">PATTERN</h3>
-            <input v-if="patternsCount>0"
-                   type="number"
-                   class="number"
-                   style="font-size: 2.5em;"
-                   v-model.lazy.number="patternSel">
-            <PlusMinusButtons mode="pattern" />
-            <CreateDeleteButtons mode="pattern" />
-          </div>
-        </div>
-        <!-- TRANSPORT -->
-        <div class="box transport">
-          <TransportButtons />
-        </div>
-      </div>
       <!-- CENTER, PREVIEW COLUMN -->
       <div id="preview" class="column w50">
         <!-- ROWS -->
@@ -143,11 +95,7 @@
               <div class="playhead" :style="`left: ${this.phspot}%;`"> </div>
         </div>
       </div>
-      <!-- RIGHT, EYECANDY COLUMN -->
-      <div id="eyecandy" class="column w25">
-        EYECANDY
       </div>
-    </div>
   </div>
 
 </template>
@@ -181,15 +129,7 @@
     background-color: rgb(136, 136, 136);
     box-shadow: 0 0 0.5em 2px rgb(159, 159, 159) inset;
     z-index: 0;
-  }
-
-  .column.w25 {
-    width: calc(25% - 1em);
-    margin: 0 0.5em;
-  }
-
-  .column.w50 {
-    width: calc(50% - 1em);
+    width: calc(100% - 1em);
     margin: 0 0.5em;
   }
 
@@ -215,10 +155,6 @@
     box-shadow: 0 0 1em 2px rgba(120, 120, 120, 0.8) inset;
   }
 
-  .box.arrows {
-    margin-bottom: 1.75em;
-  }
-
   .number {
     position: absolute;
     height: min-content;
@@ -235,23 +171,6 @@
     text-shadow: 0 0 0.25em black;
     color: rgb(136, 136, 136);
   }
-
-  #info {
-    flex-flow: column;
-  }
-
-  /* TRANSPORT FORMATTING */
-
-  .box.transport {
-    display: flex;
-    position: static;
-    flex-grow: 1;
-    width: auto;
-    height: auto;
-    margin: 0.5em 0.5em;
-
-  }
-
 
   /* PREVIEW TABLE FORMATTING */
 
@@ -271,21 +190,6 @@
     flex-grow: 1;
     display: flex;
     flex-direction: row;
-  }
-
-  .row-track-item.highlighted {
-    box-shadow: 0 0 2em 0 rgba(200, 200, 200, 0.8) inset;
-  }
-
-  .row-track-enter-active,
-  .row-track-leave-active {
-    transition: transform 1s ease-in-out, opacity 1s ease-in-out;
-  }
-
-  .row-track-enter,
-  .row-track-leave-to {
-    transform: scaleY(0);
-    opacity: 0;
   }
 
   .row-block-div {
@@ -319,63 +223,6 @@
 
   .list-blocks-move {
     transition: transform 1s;
-  }
-
-  .details {
-    display: flex;
-    flex-grow: 0;
-    order: -1;
-    flex-direction: column;
-
-    align-self: center;
-
-    padding-left: 0.25em;
-    padding-right: 0.125em;
-
-    font-family: 'Share Tech Mono', monospace;
-  }
-
-  .detail-box {
-    flex-grow: 2;
-    font-size: 0.75em;
-  }
-
-  .detail-dot {
-    font-size: 0.125em;
-    flex-grow: 1;
-    height: 1em;
-    line-height: 1em;
-  }
-
-  /* THAT STUPID LINE TO TRACE ACROSS */
-  .playhead-area {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 10em;
-    padding-left: 1.5em;
-    padding-right: 1.25em;
-    /* box-shadow: 0 0 0.25em 1px rgba(71, 4, 4, 0.5); */
-    /* background-color: rgb(71, 4, 4); */
-  }
-
-  .playhead {
-    position: relative;
-    top: 0;
-    /* left: 100%; */
-    width: 2px;
-    height: 100%;
-    /* box-shadow: 0 0 0.25em 2px rgba(48, 48, 48, 0.5); */
-    background-color: rgb(48, 48, 48);
-    z-index: -1;
-  }
-
-  /* EYECANDY FORMATTING */
-  #eyecandy {
-    height: 10em;
-    line-height: 10em;
-    text-align: center;
   }
 
 </style>

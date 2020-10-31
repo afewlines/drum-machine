@@ -6,13 +6,19 @@ class DrumSample {
     this.name = this.name[this.name.length - 1];
     this.element = null;
   }
-  load_sample(document) {
+  load_sample() {
     let el = document.createElement("audio");
     el.src = this.path;
     el.id = "sample" + this.id;
     el.type = 'audio/mpeg';
     this.element = el;
     return this.element;
+  }
+  play() {
+    if (this.element) {
+      this.element.currentTime = 0;
+      this.element.play();
+    }
   }
 }
 DrumSample.count = 0;

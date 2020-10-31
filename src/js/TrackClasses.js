@@ -1,3 +1,5 @@
+import { MasterSequencer, GraphicalSequencer } from '@/js/SequencerClasses.js'
+
 const TrackTypes = {
   // cheeky js enum
   BASE: "base",
@@ -19,6 +21,10 @@ class Track {
     return this.patterns[this.activePattern];
   }
 
+  get patternCount() {
+    return this.patterns.length;
+  }
+
   get data() {
     // get the data of the active pattern for preview, etc
     return this.pattern;
@@ -28,26 +34,19 @@ class Track {
     // set pattern directly to number
     if (target >= 0 && target < this.patterns.length) {
       this.activePattern = target;
-      return true;
-    } else {
-      return false;
     }
   }
 
-  set patternRelative(target) {
+  patternRelative(target) {
     // inc/dec pattern
-    target += this.activePattern
-    return this.patternIndex = target;
+    let result = this.patternIndex = target + this.activePattern
+    return result >= 0 && result < this.patterns.length;
   }
 
   newPattern() {
     // make-a da baby (random)
     // TODO: make not random, make work right
-    let patt = [];
-    for (var i = 0; i < 2 + Math.floor(Math.random() * 7); i++) {
-      patt.push(Math.floor(Math.random() * 2));
-    }
-    this.patterns.push(patt);
+    this.patterns.push(new GraphicalSequencer(3 + Math.floor(Math.random() * 12)));
     this.activePattern = this.patterns.length - 1;
     return true;
   }
@@ -66,6 +65,12 @@ class Track {
     return false;
   }
 
+  updateTime(length) {
+    if (this.activePattern >= 0) {
+      this.pattern.updateTime(length);
+    }
+  }
+
 }
 
 // TODO: this bad boy
@@ -75,6 +80,19 @@ class MasterTrack extends Track {
   constructor() {
     super(0);
     this.type = TrackTypes.MASTER;
+  }
+  playAt(last, next) {
+    // if (this.activePattern >= 0) {
+    //   this.pattern.playAt(last, next);
+    // }
+  }
+  newPattern() {
+    this.patterns.push(new MasterSequencer(4));
+    this.activePattern = this.patterns.length - 1;
+    return true;
+  }
+  updateTime(x) {
+    return false;
   }
 }
 
@@ -86,7 +104,18 @@ class MIDITrack extends Track {
   constructor(id) {
     super(id);
     this.type = TrackTypes.MIDI;
+    this.instrument = null;
   }
+  setInstrument(target) {
+    this.instrument = target;
+    return this.instrument.load_sample();
+  }
+  playAt(last, next) {
+    if (this.activePattern >= 0 && this.pattern.playAt(last, next)) {
+      this.instrument.play();
+    }
+  }
+
 }
 
 

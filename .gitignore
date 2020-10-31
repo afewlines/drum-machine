@@ -2,7 +2,9 @@
 node_modules
 /dist
 
-/public/samples
+/public/samples/ELPHNT_707
+/public/samples/ELPHNT_LM-1
+/public/samples/conver.sh
 
 # local env files
 .env.local

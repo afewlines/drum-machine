@@ -12,9 +12,6 @@
   // classes and types from the sequencer class file
   import { GraphicalSequencer } from '@/js/SequencerClasses.js';
 
-  // prepare audio context for cross-browser audio
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-
   // this export goes to vue, represents the div w id 'app'
   // is interpreted as a Vue Component
   // name: internal name for component
@@ -32,26 +29,48 @@
     data() {
       return {
         // references
-        audioContext: new AudioContext(),
         audioReferences: audios,
+        audioContext: new (window.AudioContext || window.webkitAudioContext)(),
+        transport: {},
         // resources
-        tracks: [new MasterTrack()],
+        masterTrack: new MasterTrack(),
+        midiTracks: [],
+        // tracks: [],
         tracksCreated: 0,
         audioElements: {},
         // state information
         selectedTrack: 0,
+        // transport settings
+        stopped: true,
+        animationFrame: null,
+        // transport vars
+
         // temp transport testing
-        timeInfo: { bpm: 174, beats: 8 },
+        timeInfo: { bpm: 174, beats: 16 },
         transportLoopDuration: 0,
         transportLoopSpot: 0,
+        transportReset: false,
         last: 0,
         tick: 0,
+        ms: 0,
       };
     },
     computed: {
+      tracks: {
+        get: function() {
+          return [this.masterTrack].concat(this.midiTracks);
+        },
+        set: function(value) {
+          console.log(value);
+          // this.midiTracks
+        },
+      },
       track() {
         // the currently selected track
         return this.tracks[this.selectedTrack];
+      },
+      trackCount() {
+        return this.midiTracks.length + 1;
       },
       selectedPattern() {
         // current track's active pattern
@@ -59,20 +78,11 @@
       },
     },
     methods: {
-      transportPlay(data) {
-        // this is the play loop, currently spits out delta times
-        this.last = this.tick;
-        this.tick = data;
-        let delta = data - this.last;
-        this.transportLoopSpot += delta;
-        let reset = this.transportLoopSpot >= this.transportLoopDuration;
-        for (let track of this.tracks) {
-          track.playAt(this.transportLoopSpot, reset);
-        }
-        if (reset) {
-          this.transportLoopSpot = 0;
-        }
-        requestAnimationFrame(this.transportPlay);
+      updateActiveTime() {
+        // for (let track of this.midiTracks) {
+          console.log('updating:', this.track.id);
+          this.track.updateTime(this.transportLoopDuration);
+        // }
       },
       onResize() {
         // keep window in the right shape
@@ -82,13 +92,14 @@
         // tries to set track or pattern selection
         switch (data.mode) {
           case 'track':
-            if (data.value >= 0 && data.value < this.tracks.length) {
+            if (data.value >= 0 && data.value < this.trackCount) {
               this.selectedTrack = data.value;
               return true;
             }
             break;
           case 'pattern':
             if ((this.track.patternIndex = data.value)) {
+              this.updateActiveTime();
               return true;
             }
             break;
@@ -103,14 +114,15 @@
           case 'track':
             if (
               this.selectedTrack + x >= 0 &&
-              this.selectedTrack + x < this.tracks.length
+              this.selectedTrack + x < this.trackCount
             ) {
               this.selectedTrack += x;
               return true;
             }
             break;
           case 'pattern':
-            if ((this.track.patternRelative = x)) {
+            if ((this.track.patternRelative(x))) {
+              this.updateActiveTime();
               return true;
             }
             break;
@@ -123,11 +135,20 @@
         // attempt to make new track or pattern
         switch (mode) {
           case 'track':
-            this.tracks.push(new MIDITrack(++this.tracksCreated));
-            this.selectedTrack = this.tracks.length - 1;
+            this.midiTracks.push(new MIDITrack(++this.tracksCreated));
+            this.selectedTrack = this.trackCount - 1;
+            this.$refs.audio_bin.append(
+              this.track.setInstrument(
+                audios.ELPHNT['LM-1'][Math.floor(Math.random()*audios.ELPHNT['LM-1'].length)]
+              ),
+            );
             return true;
           case 'pattern':
-            return this.track.newPattern();
+            if (this.track.newPattern()) {
+              this.updateActiveTime();
+              return true;
+            }
+            break;
           default:
             break;
         }
@@ -137,8 +158,8 @@
         // attempt to delete current track or pattern
         switch (mode) {
           case 'track':
-            if (this.tracks[this.selectedTrack].type != TrackTypes.MASTER) {
-              this.tracks.splice(this.selectedTrack, 1);
+            if (this.track.type != TrackTypes.MASTER) {
+              this.midiTracks.splice(this.selectedTrack - 1, 1);
               if (!this.tryChange('track', 0)) {
                 this.tryChange('track', -1);
               }
@@ -150,6 +171,7 @@
               if (!this.tryChange('pattern', 0)) {
                 this.tryChange('pattern', -1);
               }
+              this.updateActiveTime();
               return true;
             }
             break;
@@ -158,8 +180,62 @@
         }
         return false;
       },
+      startAudioContext() {
+        if (this.audioContext.state != 'running') {
+          this.audioContext
+            .resume()
+            .then(
+              () => console.log('Web Audio API: AudioContext Running'),
+              this.startAudioContext,
+            );
+        }
+      },
     },
     created() {
+      this.transport = {
+        play: function(data = 0) {
+          // THE LOOPING PLAY FUNCTION
+
+          // if the stopped flag is on, reset and kill
+          // reset is broken lmao
+          if (this.stopped) {
+            this.transportLoopSpot = 0;
+            this.last = 0;
+            this.tick = 0;
+            console.log('STOPPED');
+            return;
+          }
+          // this.ms = Date.now();
+          // this.transportLoopSpot += this.ms - this.tick;
+          this.transportLoopSpot += data - this.tick;
+          for (let track of this.tracks) {
+            track.playAt(this.last, this.transportLoopSpot);
+          }
+          if (this.transportLoopSpot >= this.transportLoopDuration) {
+            this.transportLoopSpot -= this.transportLoopDuration;
+            this.last = 0;
+            console.log('NEW BAR');
+          } else {
+            // console.log(this.transportLoopSpot);
+            this.last = this.transportLoopSpot;
+          }
+          // this.tick = this.ms;
+          this.tick = data;
+
+          requestAnimationFrame(this.transport.play);
+        }.bind(this),
+        enter: function(data) {
+          if (this.stopped) {
+            this.stopped = false;
+            this.tick = data;
+            requestAnimationFrame(this.transport.play);
+          }
+        }.bind(this),
+        start:()=>requestAnimationFrame(this.transport.enter),
+        stop: function() {
+          this.stopped = true;
+        }.bind(this),
+      };
       // prepare some variables
       this.transportLoopDuration =
         (60000 / this.timeInfo.bpm) * this.timeInfo.beats;
@@ -172,6 +248,7 @@
         { name: 'try-create', callback: v => this.tryCreate(v) },
         { name: 'try-delete', callback: v => this.tryDelete(v) },
         { name: 'try-set', callback: v => this.trySet(v) },
+        { name: 'transport', callback: v => this.transport[v]() },
       ];
 
       for (let e of EVENTS) {
@@ -180,6 +257,8 @@
       // stanard event for resize, call once for good luck
       window.addEventListener('resize', this.onResize);
       this.onResize();
+      let getAudio = function() {};
+      setTimeout(this.startAudioContext, 200);
     },
   };
 
@@ -191,11 +270,14 @@
     <MainPanel ref="main" />
     <div id="nav">
       [
-      <router-link to="/">Instrument</router-link>] [
-      <router-link to="/">Sequencer</router-link>] [
-      <router-link to="/">Mixing</router-link>]
+      <router-link to="/Instrument">Instrument</router-link>] [
+      <router-link to="/Sequencer">Sequencer</router-link>] [
+      <router-link to="/Mixing">Mixing</router-link>]
     </div>
     <router-view />
+    <div ref="audio_bin">
+
+    </div>
   </div>
 
 </template>
