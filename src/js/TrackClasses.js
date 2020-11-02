@@ -48,6 +48,7 @@ class Track {
     // TODO: make not random, make work right
     this.patterns.push(new GraphicalSequencer(3 + Math.floor(Math.random() * 12)));
     this.activePattern = this.patterns.length - 1;
+    this.pattern.updateTime();
     return true;
   }
 
@@ -73,29 +74,6 @@ class Track {
 
 }
 
-// TODO: this bad boy
-// keep track of bpm
-// patterns will just be # of beats at whatever bpm
-class MasterTrack extends Track {
-  constructor() {
-    super(0);
-    this.type = TrackTypes.MASTER;
-  }
-  playAt(last, next) {
-    // if (this.activePattern >= 0) {
-    //   this.pattern.playAt(last, next);
-    // }
-  }
-  newPattern() {
-    this.patterns.push(new MasterSequencer(4));
-    this.activePattern = this.patterns.length - 1;
-    return true;
-  }
-  updateTime(x) {
-    return false;
-  }
-}
-
 // TODO: also this bad boy
 // uhhhhhhhhhhhhhh
 // at this point just a list of {time, mididata}
@@ -118,5 +96,62 @@ class MIDITrack extends Track {
 
 }
 
+// STATIC, TECHNICALLY UNRELATED SUBCLASS
+// keep track of bpm
+// patterns will just be # of beats at whatever bpm
+const MasterTrack = {
+  id: 0,
+  created: false,
+  type: TrackTypes.MASTER,
+  volume: 1,
+  patterns: [],
+  activePattern: -1,
+  init() {
+    this.newPattern();
+    return this;
+  },
+  get pattern() {
+    // get the active pattern
+    return this.patterns[this.activePattern];
+  },
+  get patternCount() {
+    return this.patterns.length;
+  },
+  set patternIndex(target) {
+    // set pattern directly to number
+    if (target >= 0 && target < this.patterns.length) {
+      this.activePattern = target;
+    }
+  },
+  patternRelative(target) {
+    // inc/dec pattern
+    let result = this.patternIndex = target + this.activePattern
+    return result >= 0 && result < this.patterns.length;
+  },
+  newPattern() {
+    if (this.patternCount > 0) {
+      this.patterns.push(new MasterSequencer(8, this.pattern.bpm));
+    } else {
+      this.patterns.push(new MasterSequencer(8));
+    }
+    this.activePattern = this.patterns.length - 1;
+    return true;
+  },
+  deletePattern() {
+    if (this.patterns.length > 1) {
+      this.patterns.splice(this.activePattern, 1, );
+      return true;
+    } else if (this.patterns.length > 0) {
+      this.patterns.splice(this.activePattern, 1, );
+      this.activePattern = -1;
+      return true;
+    }
+    return false;
+  },
+  updateTime(length) {
+    return false;
+  },
+  playAt() {},
+}
 
 export { TrackTypes, Track, MIDITrack, MasterTrack }

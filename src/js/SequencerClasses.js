@@ -10,12 +10,11 @@ class BaseSequencer {
       this.triggers.push(fill);
     }
   }
-  updateTime(length) {
-    this.mspm = length;
+  updateTime() {
     this.timedTriggers = [];
     for (var i = 0; i < this.divisions; i++) {
       if (this.triggers[i] > 0) {
-        this.timedTriggers.push((i * this.mspm) / this.divisions);
+        this.timedTriggers.push(i / this.divisions);
       }
     }
   }
@@ -32,12 +31,14 @@ class BaseSequencer {
   }
 }
 
+
 class MasterSequencer extends BaseSequencer {
-  constructor(divisions) {
-    super(divisions, 1)
+  constructor(divisions, bpm = 120) {
+    super(divisions, 1);
+    this.bpm = bpm;
   }
   playAt() {
-
+    // not called atm
   }
 }
 

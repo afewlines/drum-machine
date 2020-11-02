@@ -1,23 +1,38 @@
 <script>
 
-  // import components that do things
+  // import ui components
   import PlusMinusButtons from '@/components/PlusMinusButtons.vue';
 
   export default {
     name: 'SequencerPanel',
     components: {
-      // PlusMinusButtons,
+      PlusMinusButtons,
     },
     data() {
+      // variables go here
       return {
-        // not hooked up yet, might not hook up.
-        // for pagination of high track #
-        zoom: 5,
-        offset: 0,
       };
     },
-    mounted() {},
+    mounted() {
+      // what happens when it loads goes here
+    },
     computed: {
+      // fake variables go here
+      // TODO NOAH:
+      // make 'active pattern' getter, will be pattern of current track
+      // hint; see active track, parent component is 'App.vue'
+      //
+      // track/parent sel shouldn't really be used here i don't think
+      // BUT you will need similar structure for:
+      // the current track's current pattern's triggers
+      //    (will have to verify that the track's active pattern is valid)
+      // the current bpm
+      //    (from master track's active pattern)
+      //
+      // that's all i can think of off the top o my head here
+      // oh and to test/print, use console.log(). it'll be in your inspect>console
+      // ADDENDUM: noticed there's an issue opening the vue tab in inspect
+      //    while playing, so uh just don't.
       trackSel: {
         get: function() {
           // get index of selected track
@@ -38,25 +53,14 @@
           this.$emit('try-set', { mode: 'pattern', value: x });
         },
       },
-      trackReal() {
+      activeTrack() {
         // current track object
         return this.$parent.track;
       },
-      previewRows() {
-        // all rows that can be displayed
-        let out = [];
-        for (let i = 0; i < this.zoom; i++) {
-          if (i + this.offset < this.tracksCount) {
-            if (this.tracksAll[i + this.offset].activePattern >= 0) {
-              out.push(this.tracksAll[i + this.offset]);
-            }
-          }
-        }
-        return out;
-      },
-
     },
-    methods: {},
+    methods: {
+      // functions go here
+    },
   };
 
 </script>
@@ -65,33 +69,42 @@
 
   <div class="container">
     <div class="panel">
-      <!-- CENTER, PREVIEW COLUMN -->
-      <div id="preview" class="column w50">
-        <!-- ROWS -->
-        <transition-group name="row-track"
+      <!-- LEFT, INFO COLUMN -->
+      <div id="info" class="column w25">
+          <!-- TRACK -->
+          <div class="box arrows">
+            <h3 style="left: -1.35em;">HEY</h3>
+            <input type="number"
+                   class="number"
+                   style="font-size: 2.5em;"
+                   v-model.lazy.number="trackSel">
+            <PlusMinusButtons mode="track" />
+          </div>
+          <!-- PATTERN -->
+          <div class="box arrows">
+            <h3 style="right: -1.35em;">NOAH</h3>
+            <input v-if="activeTrack.patternCount>0"
+                   type="number"
+                   class="number"
+                   style="font-size: 2.5em;"
+                   v-model.lazy.number="patternSel">
+            <PlusMinusButtons mode="pattern" />
+          </div>
+      </div>
+      <!-- RIGHT, SEQUENCER COLUMN -->
+      <div id="preview" class="column w75">
+        <!-- ELEMENTS -->
+        <transition-group name="list-blocks"
                           tag="div"
-                          class="preview-table">
-          <div v-for="track in previewRows"
-               :key="track.id"
-               :class="'row-track-item'+((track.id==trackReal.id)?' highlighted':'')">
-            <!-- ELEMENTS -->
-            <div class="details">
-              <div class="detail-box" style="top: 0;">{{track.activePattern}}</div>
-              <div class="detail-dot">-</div>
-              <div class="detail-box" style="bottom: 0; font-size: 0.5em;">{{track.patternCount-1}}</div>
-            </div>
-            <transition-group name="list-blocks"
-                              tag="div"
-                              class="row-block-div">
-              <div v-for="(div, iel) in track.pattern.triggers"
-                   :key="iel"
-                   :class="'row-block'+(div>0?' on':'')">
-              </div>
-            </transition-group>
+                          class="row-block-div">
+          <div v-for="(div, iel) in activeTrack.pattern.triggers"
+               :key="iel"
+               :class="'row-block'+(div>0?' on':'')">
           </div>
         </transition-group>
+
       </div>
-      </div>
+    </div>
   </div>
 
 </template>
@@ -111,6 +124,10 @@
     padding: 1em 0.5em;
     background-color: rgb(48, 48, 48);
     z-index: -1;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
   }
 
   .panel:after {
@@ -120,13 +137,23 @@
   }
 
   .column {
-    float: left;
+    /* float: left; */
     position: relative;
     background-color: rgb(136, 136, 136);
     box-shadow: 0 0 0.5em 2px rgb(159, 159, 159) inset;
     z-index: 0;
-    width: calc(100% - 1em);
     margin: 0 0.5em;
+
+    display: flex;
+    justify-content: center;
+  }
+
+  .column.w25{
+    flex-grow:1;
+  }
+
+  .column.w75{
+    flex-grow:25;
   }
 
   /* INFO FORMATTING */
@@ -151,6 +178,11 @@
     box-shadow: 0 0 1em 2px rgba(120, 120, 120, 0.8) inset;
   }
 
+  .box.arrows{
+    margin: 0.75em;
+    margin-bottom: 1.75em;
+  }
+
   .number {
     position: absolute;
     height: min-content;
@@ -170,25 +202,9 @@
 
   /* PREVIEW TABLE FORMATTING */
 
-  .preview-table {
-    width: 100%;
-    height: 10em;
-    padding: 0.5em;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: scroll;
-  }
-
-  .row-track-item {
-    box-shadow: 0 0 0em 0 rgba(64, 64, 64, 0.8) inset;
-    transition: box-shadow 0.35s ease-in-out;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: row;
-  }
-
   .row-block-div {
+    padding: 0.25em;
+
     flex-grow: 1;
     display: flex;
     flex-direction: row;

@@ -33,7 +33,7 @@
         audioContext: new (window.AudioContext || window.webkitAudioContext)(),
         transport: {},
         // resources
-        masterTrack: new MasterTrack(),
+        masterTrack: MasterTrack.init(),
         midiTracks: [],
         // tracks: [],
         tracksCreated: 0,
@@ -42,28 +42,16 @@
         selectedTrack: 0,
         // transport settings
         stopped: true,
-        animationFrame: null,
         // transport vars
-
-        // temp transport testing
-        timeInfo: { bpm: 174, beats: 16 },
-        transportLoopDuration: 0,
         transportLoopSpot: 0,
-        transportReset: false,
         last: 0,
         tick: 0,
-        ms: 0,
       };
     },
     computed: {
-      tracks: {
-        get: function() {
-          return [this.masterTrack].concat(this.midiTracks);
-        },
-        set: function(value) {
-          console.log(value);
-          // this.midiTracks
-        },
+      tracks() {
+        // all tracks
+        return [this.masterTrack].concat(this.midiTracks);
       },
       track() {
         // the currently selected track
@@ -76,14 +64,20 @@
         // current track's active pattern
         return this.track.activePattern;
       },
+      masterPattern() {
+        // current pattern of master track
+        return this.masterTrack.patterns[this.masterTrack.activePattern];
+      },
+      transportLoopDuration() {
+        // more efficent live bpm changes
+        return (60000 / this.masterPattern.bpm) * this.masterPattern.divisions;
+      },
+      spotNext() {
+        // get 0-1 spot to play to
+        return this.transportLoopSpot / this.transportLoopDuration;
+      },
     },
     methods: {
-      updateActiveTime() {
-        // for (let track of this.midiTracks) {
-          console.log('updating:', this.track.id);
-          this.track.updateTime(this.transportLoopDuration);
-        // }
-      },
       onResize() {
         // keep window in the right shape
         this.$refs.app.style = 'width: 100vw; height:100vh';
@@ -99,7 +93,6 @@
             break;
           case 'pattern':
             if ((this.track.patternIndex = data.value)) {
-              this.updateActiveTime();
               return true;
             }
             break;
@@ -121,8 +114,7 @@
             }
             break;
           case 'pattern':
-            if ((this.track.patternRelative(x))) {
-              this.updateActiveTime();
+            if (this.track.patternRelative(x)) {
               return true;
             }
             break;
@@ -139,13 +131,14 @@
             this.selectedTrack = this.trackCount - 1;
             this.$refs.audio_bin.append(
               this.track.setInstrument(
-                audios.ELPHNT['LM-1'][Math.floor(Math.random()*audios.ELPHNT['LM-1'].length)]
+                audios.ELPHNT['LM-1'][
+                  Math.floor(Math.random() * audios.ELPHNT['LM-1'].length)
+                ],
               ),
             );
             return true;
           case 'pattern':
             if (this.track.newPattern()) {
-              this.updateActiveTime();
               return true;
             }
             break;
@@ -171,7 +164,6 @@
               if (!this.tryChange('pattern', 0)) {
                 this.tryChange('pattern', -1);
               }
-              this.updateActiveTime();
               return true;
             }
             break;
@@ -192,12 +184,12 @@
       },
     },
     created() {
+      // register transport functions
       this.transport = {
         play: function(data = 0) {
           // THE LOOPING PLAY FUNCTION
 
           // if the stopped flag is on, reset and kill
-          // reset is broken lmao
           if (this.stopped) {
             this.transportLoopSpot = 0;
             this.last = 0;
@@ -205,40 +197,43 @@
             console.log('STOPPED');
             return;
           }
-          // this.ms = Date.now();
-          // this.transportLoopSpot += this.ms - this.tick;
+
+          // update current ms in playback
           this.transportLoopSpot += data - this.tick;
+
+          // play all tracks at current %s
           for (let track of this.tracks) {
-            track.playAt(this.last, this.transportLoopSpot);
+            track.playAt(this.last, this.spotNext);
           }
-          if (this.transportLoopSpot >= this.transportLoopDuration) {
+
+          // if we're at/past the end, reset w overflow
+          // else, store the current play-to %
+          if (this.spotNext >= 1) {
             this.transportLoopSpot -= this.transportLoopDuration;
             this.last = 0;
             console.log('NEW BAR');
           } else {
-            // console.log(this.transportLoopSpot);
-            this.last = this.transportLoopSpot;
+            this.last = this.spotNext;
           }
-          // this.tick = this.ms;
+
+          // store last tick for delta time
           this.tick = data;
 
           requestAnimationFrame(this.transport.play);
         }.bind(this),
         enter: function(data) {
+          // THE "START PLAYING" FUNCTION
           if (this.stopped) {
             this.stopped = false;
             this.tick = data;
             requestAnimationFrame(this.transport.play);
           }
         }.bind(this),
-        start:()=>requestAnimationFrame(this.transport.enter),
+        start: () => requestAnimationFrame(this.transport.enter),
         stop: function() {
           this.stopped = true;
         }.bind(this),
       };
-      // prepare some variables
-      this.transportLoopDuration =
-        (60000 / this.timeInfo.bpm) * this.timeInfo.beats;
     },
     mounted() {
       // register events programatically
@@ -250,15 +245,16 @@
         { name: 'try-set', callback: v => this.trySet(v) },
         { name: 'transport', callback: v => this.transport[v]() },
       ];
-
       for (let e of EVENTS) {
         this.$refs.main.$on(e.name, e.callback);
       }
+
       // stanard event for resize, call once for good luck
       window.addEventListener('resize', this.onResize);
       this.onResize();
-      let getAudio = function() {};
-      setTimeout(this.startAudioContext, 200);
+
+      // audio context waits for user interaction
+      setTimeout(this.startAudioContext, 500);
     },
   };
 

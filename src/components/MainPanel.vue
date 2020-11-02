@@ -55,14 +55,14 @@
       trackReal() {
         return this.$parent.track;
       },
-      patternsCount() {
+      patternCount() {
         // # of patterns in track
-        return this.trackReal.patterns.length;
+        return this.trackReal.patternCount;
       },
       previewRows() {
         // all rows that can be displayed
         let out = [];
-        for (let i = 0; i < this.zoom; i++) {
+        for (let i = 0; i < this.tracksCount; i++) {
           if (i + this.offset < this.tracksCount) {
             if (this.tracksAll[i + this.offset].activePattern >= 0) {
               out.push(this.tracksAll[i + this.offset]);
@@ -71,9 +71,12 @@
         }
         return out;
       },
-      phspot(){
-        return this.$parent.stopped?0:(100*this.$parent.transportLoopSpot/this.$parent.transportLoopDuration);
-      }
+      phspot() {
+        return this.$parent.stopped
+          ? 0
+          : (100 * this.$parent.transportLoopSpot) /
+              this.$parent.transportLoopDuration;
+      },
     },
   };
 
@@ -99,7 +102,7 @@
           <!-- PATTERN -->
           <div class="box arrows" style="float: right; margin-right: 0.75em;">
             <h3 style="right: -1.35em;">PATTERN</h3>
-            <input v-if="patternsCount>0"
+            <input v-if="patternCount>0"
                    type="number"
                    class="number"
                    style="font-size: 2.5em;"
@@ -132,15 +135,15 @@
                               tag="div"
                               class="row-block-div">
               <div v-for="(div, iel) in track.pattern.triggers"
-                   :key="iel"
+                   :key="iel+1"
                    :class="'row-block'+(div>0?' on':'')">
               </div>
             </transition-group>
           </div>
         </transition-group>
         <!-- PLAYHEAD -->
-        <div class="playhead-area" >
-              <div class="playhead" :style="`left: ${this.phspot}%;`"> </div>
+        <div class="playhead-area">
+          <div class="playhead" :style="`left: ${this.phspot}%;`"> </div>
         </div>
       </div>
       <!-- RIGHT, EYECANDY COLUMN -->
@@ -249,9 +252,7 @@
     width: auto;
     height: auto;
     margin: 0.5em 0.5em;
-
   }
-
 
   /* PREVIEW TABLE FORMATTING */
 
