@@ -90,10 +90,6 @@
             </transition-group>
           </div>
         </transition-group>
-        <!-- PLAYHEAD -->
-        <div class="playhead-area" >
-              <div class="playhead" :style="`left: ${this.phspot}%;`"> </div>
-        </div>
       </div>
       </div>
   </div>
