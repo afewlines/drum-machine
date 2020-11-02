@@ -40,6 +40,7 @@ class MasterSequencer extends BaseSequencer {
   playAt() {
     // not called atm
   }
+
 }
 
 class GraphicalSequencer extends BaseSequencer {
@@ -52,6 +53,11 @@ class GraphicalSequencer extends BaseSequencer {
     for (var i = 0; i < this.divisions; i++) {
       this.triggers.push(Math.floor(Math.random() * 2));
     }
+  }
+  toggleTrigger(index) {
+    //this function will toggle the triggers
+    this.triggers[index] = !this.triggers[index];
+    this.updateTime();
   }
 }
 

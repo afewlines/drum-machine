@@ -3,6 +3,9 @@
   // import ui components
   import PlusMinusButtons from '@/components/PlusMinusButtons.vue';
 
+  // import our classes
+  import { TrackTypes } from '@/js/TrackClasses.js';
+
   export default {
     name: 'SequencerPanel',
     components: {
@@ -11,6 +14,7 @@
     data() {
       // variables go here
       return {
+        trackTypes: TrackTypes,
       };
     },
     mounted() {
@@ -33,14 +37,43 @@
       // oh and to test/print, use console.log(). it'll be in your inspect>console
       // ADDENDUM: noticed there's an issue opening the vue tab in inspect
       //    while playing, so uh just don't.
-      trackSel: {
+
+      triggerSel: {
+        get: function() {
+          //if (this.track.activePattern >= 0){
+          return this.$parent.triggers;
+        },
+        set: function(x) {
+          this.$emit('try-set', { mode: 'triggers', value: x });
+        },
+      },
+      masterBPM: {
+        get: function() {
+          //return this.$parent.bpm;
+          return this.$parent.masterPattern.bpm;
+        },
+        set: function(x) {
+          if (x > 0) {
+            this.$parent.masterPattern.bpm = x;
+          }
+        },
+      },
+      patternDivisions: {
         get: function() {
           // get index of selected track
-          return this.$parent.selectedTrack;
+          if (this.activeTrackHasPattern){
+            return this.activePattern.divisions;
+          }
+          else{
+            return 0;
+          }
         },
         set: function(x) {
           // try to set index of selected track
-          this.$emit('try-set', { mode: 'track', value: x });
+          if (x > 0){
+            this.activePattern.divisions = x;
+            this.activePattern.updateTime();
+          }
         },
       },
       patternSel: {
@@ -57,9 +90,37 @@
         // current track object
         return this.$parent.track;
       },
+      activeTrackHasPattern() {
+        // if active track has pattern
+        return this.activeTrack.activePattern >= 0;
+      },
+      activePattern() {
+        //current patterns
+        return this.activeTrack.pattern;
+      },
+      activeDivisions() {
+        return Array.from(new Array(this.activePattern.divisions), (x, i) => i);
+      },
     },
     methods: {
       // functions go here
+      toggleTrigger(index) {
+        console.log(`trigger ${index} times`);
+        this.activePattern.toggleTrigger(index);
+      },
+      tryChange(mode, inc) {
+        switch (mode) {
+          case 'divisions':
+            this.patternDivisions += inc;
+            return true;
+          case 'bpm':
+            this.masterBPM += inc;
+            return true;
+          default:
+            break;
+        }
+        return false;
+      },
     },
   };
 
@@ -71,35 +132,42 @@
     <div class="panel">
       <!-- LEFT, INFO COLUMN -->
       <div id="info" class="column w25">
-          <!-- TRACK -->
-          <div class="box arrows">
-            <h3 style="left: -1.35em;">HEY</h3>
-            <input type="number"
-                   class="number"
-                   style="font-size: 2.5em;"
-                   v-model.lazy.number="trackSel">
-            <PlusMinusButtons mode="track" />
-          </div>
-          <!-- PATTERN -->
-          <div class="box arrows">
-            <h3 style="right: -1.35em;">NOAH</h3>
-            <input v-if="activeTrack.patternCount>0"
-                   type="number"
-                   class="number"
-                   style="font-size: 2.5em;"
-                   v-model.lazy.number="patternSel">
-            <PlusMinusButtons mode="pattern" />
-          </div>
+        <!-- TRACK -->
+        <div class="box arrows">
+          <h3 style="left: -1.35em;">DIVISIONS</h3>
+          <input type="number"
+                 class="number"
+                 style="font-size: 2.5em;"
+                 v-model.lazy.number="patternDivisions">
+          <PlusMinusButtons v-on:try-inc="v => this.tryChange(v, 1)"
+                            v-on:try-dec="v => this.tryChange(v, -1)"
+                            mode="divisions"
+                            :local="true" />
+        </div>
+        <!-- PATTERN -->
+        <div class="box arrows" v-if="activeTrack.type == trackTypes.MASTER">
+          <h3 style="right: -1.35em;">BPM</h3>
+          <input type="number"
+                 class="number"
+                 style="font-size: 2.5em;"
+                 v-model.lazy.number="masterBPM">
+          <PlusMinusButtons v-on:try-inc="v => this.tryChange(v, 1)"
+                            v-on:try-dec="v => this.tryChange(v, -1)"
+                            mode="bpm"
+                            :local="true" />
+        </div>
       </div>
       <!-- RIGHT, SEQUENCER COLUMN -->
       <div id="preview" class="column w75">
         <!-- ELEMENTS -->
-        <transition-group name="list-blocks"
+        <transition-group v-if="activeTrackHasPattern"
+                          name="list-blocks"
                           tag="div"
                           class="row-block-div">
-          <div v-for="(div, iel) in activeTrack.pattern.triggers"
+          <div v-for="iel in activeDivisions"
+               v-on:click="toggleTrigger(iel)"
                :key="iel"
-               :class="'row-block'+(div>0?' on':'')">
+               :class="'row-block'+(activeTrack.pattern.triggers[iel]>0?' on':'')">
           </div>
         </transition-group>
 
@@ -148,12 +216,12 @@
     justify-content: center;
   }
 
-  .column.w25{
-    flex-grow:1;
+  .column.w25 {
+    flex-grow: 1;
   }
 
-  .column.w75{
-    flex-grow:25;
+  .column.w75 {
+    flex-grow: 25;
   }
 
   /* INFO FORMATTING */
@@ -178,7 +246,7 @@
     box-shadow: 0 0 1em 2px rgba(120, 120, 120, 0.8) inset;
   }
 
-  .box.arrows{
+  .box.arrows {
     margin: 0.75em;
     margin-bottom: 1.75em;
   }

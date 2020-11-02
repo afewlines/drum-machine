@@ -78,6 +78,11 @@
               this.$parent.transportLoopDuration;
       },
     },
+    methods: {
+      range(num){
+        return Array.from(new Array(num), (x, i) => i);
+      }
+    },
   };
 
 </script>
@@ -134,9 +139,9 @@
             <transition-group name="list-blocks"
                               tag="div"
                               class="row-block-div">
-              <div v-for="(div, iel) in track.pattern.triggers"
+              <div v-for="iel in range(track.pattern.divisions)"
                    :key="iel+1"
-                   :class="'row-block'+(div>0?' on':'')">
+                   :class="'row-block'+(track.pattern.triggers[iel]>0?' on':'')">
               </div>
             </transition-group>
           </div>
