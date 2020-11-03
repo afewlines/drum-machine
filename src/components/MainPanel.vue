@@ -129,6 +129,7 @@
                           class="preview-table">
           <div v-for="track in previewRows"
                :key="track.id"
+               v-on:click="trackSel=track.id"
                :class="'row-track-item'+((track.id==trackReal.id)?' highlighted':'')">
             <!-- ELEMENTS -->
             <div class="details">
@@ -362,8 +363,7 @@
     height: 10em;
     padding-left: 1.5em;
     padding-right: 1.25em;
-    /* box-shadow: 0 0 0.25em 1px rgba(71, 4, 4, 0.5); */
-    /* background-color: rgb(71, 4, 4); */
+    pointer-events: none;
   }
 
   .playhead {
