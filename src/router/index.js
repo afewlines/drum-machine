@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import About from '../views/About.vue'
 import SequencerPanel from '../views/SequencerPanel.vue'
+import InstrumentPanel from '../views/InstrumentPanel.vue'
 
 Vue.use(VueRouter)
 
@@ -12,7 +13,7 @@ const routes = [{
 }, {
   path: '/Instrument',
   name: 'Instrument',
-  component: Home
+  component: InstrumentPanel
 }, {
   path: '/Sequencer',
   name: 'Sequencer',

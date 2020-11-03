@@ -129,13 +129,6 @@
           case 'track':
             this.midiTracks.push(new MIDITrack(++this.tracksCreated));
             this.selectedTrack = this.trackCount - 1;
-            this.$refs.audio_bin.append(
-              this.track.setInstrument(
-                audios.ELPHNT['LM-1'][
-                  Math.floor(Math.random() * audios.ELPHNT['LM-1'].length)
-                ],
-              ),
-            );
             return true;
           case 'pattern':
             if (this.track.newPattern()) {
@@ -271,7 +264,7 @@
       <router-link to="/Mixing">Mixing</router-link>]
     </div>
     <router-view />
-    <div ref="audio_bin">
+    <div id="audio_bin">
 
     </div>
   </div>

@@ -86,10 +86,12 @@ class MIDITrack extends Track {
   }
   setInstrument(target) {
     this.instrument = target;
-    return this.instrument.load_sample();
+    document.getElementById("audio_bin")
+      .append(this.instrument.load_sample());
+    //return this.instrument.load_sample());
   }
   playAt(last, next) {
-    if (this.activePattern >= 0 && this.pattern.playAt(last, next)) {
+    if (this.instrument != null && this.activePattern >= 0 && this.pattern.playAt(last, next)) {
       this.instrument.play();
     }
   }
