@@ -1,24 +1,29 @@
 # drum-machine
 
-## Project setup
+link to current build:
+https://kuvapcsitrd01.kutztown.edu/~bsoel323/drum-machine/#/
+
+overview: tracks have instruments, play patterns
+track 0 is master track; controls bpm/length
+instruments don't play until you assign instrument
+
+
+## install dependencies
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### dev environment
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+### make production build
 ```
 npm run build
 ```
 
-### Lints and fixes files
+### lint files
 ```
 npm run lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
