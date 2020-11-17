@@ -59,7 +59,7 @@ class GraphicalSequencer extends BaseSequencer {
   }
   toggleTrigger(index) {
     //this function will toggle the triggers
-    this.triggers[index] = !this.triggers[index];
+    this.triggers.splice(index, 0, this.triggers.splice(index, 1) > 0 ? 0 : 1);
     this.updateTime();
   }
 }

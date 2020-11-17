@@ -1,6 +1,5 @@
 <script>
-
-  // import our classes
+// import our classes
   import { TrackTypes } from '@/js/TrackClasses.js';
 
   // paths to audio files
@@ -27,74 +26,92 @@
         // current track object
         return this.$parent.track;
       },
-      activeSource(){
-        return this.audioResources[this.selectedSource]
+      activeSource() {
+        return this.audioResources[ this.selectedSource ]
       },
-      activeKit(){
-        return this.activeSource[this.selectedKit]
+      activeKit() {
+        return this.activeSource[ this.selectedKit ]
       },
-      activeSample(){
-        return this.activeKit[this.selectedSample]
+      activeSample() {
+        return this.activeKit[ this.selectedSample ]
       },
     },
     methods: {
       // functions go here
       tryLoadInstrument() {
-        if (this.selectedSource =="" || this.selectedKit == "" || this.selectedSample == "") {
+        if ( this.selectedSource == "" || this.selectedKit == "" || this.selectedSample == "" ) {
           return false;
         }
-        console.log(this.audioResources[this.selectedSource][this.selectedKit]);
-        switch (this.activeTrack.type) {
-          case this.trackTypes.MASTER:
-            console.log('Hello master');
-            return true;
-          case this.trackTypes.MIDI:
-            console.log('Hello set MIDI');
-            this.activeTrack.setInstrument(this.activeSample);
-            return true;
-          default:
-            break;
+
+        switch ( this.activeTrack.type ) {
+        case this.trackTypes.MASTER:
+          console.log( 'Hello master' );
+          return true;
+        case this.trackTypes.MIDI:
+          console.log( 'Hello set MIDI' );
+          this.activeTrack.setInstrument( this.activeSample );
+          return true;
+        default:
+          break;
         }
         return false;
       },
+      loadRandom() {
+        let target = Object.keys( this.audioResources );
+        this.selectedSource = target[ Math.floor( Math.random() *
+          Math.floor( target.length ) ) ];
+
+        target = Object.keys( this.activeSource );
+        this.selectedKit = target[ Math.floor( Math.random() *
+          Math.floor( target.length ) ) ];
+
+        target = Object.keys( this.activeKit );
+        this.selectedSample = target[ Math.floor( Math.random() *
+          Math.floor( target.length ) ) ];
+        this.tryLoadInstrument();
+      }
     },
   };
-
 </script>
 
 <template>
-
-  <div class="container">
+<div class="container">
     <div class="panel">
       <!-- INSTRUMENT PANEL -->
-      <div id="instrument" class="column w50">
+      <div id="instrument"
+           class="column w50">
         <!-- ELEMENTS -->
         <div class="row-div">
-            <select class="row-el"
-                    v-model="selectedSource">
-                   <option v-for="source in Object.keys(audioResources)"
-                   :key="source">{{source}}</option>
-            </select>
-            <select v-if="selectedSource!=''"
-                    class="row-el"
-                    v-model="selectedKit">
-                   <option v-for="kit in Object.keys(audioResources[selectedSource])"
-                   :key="kit">{{kit}}</option>
-            </select>
-            <select v-if="selectedKit!=''"
-                    class="row-el"
-                    v-model="selectedSample">
-                   <option v-for="(sample, index) in audioResources[selectedSource][selectedKit]"
-                   :key="sample.id"
-                   :value="index">{{sample.name}}</option>
-            </select>
+          <select class="row-el"
+                  v-model="selectedSource">
+            <option v-for="source in Object.keys(audioResources)"
+                    :key="source">{{source}}</option>
+          </select>
+          <select v-if="selectedSource!=''"
+                  class="row-el"
+                  v-model="selectedKit">
+            <option v-for="kit in Object.keys(audioResources[selectedSource])"
+                    :key="kit">{{kit}}</option>
+          </select>
+          <select v-if="selectedKit!=''"
+                  class="row-el"
+                  v-model="selectedSample">
+            <option v-for="(sample, index) in audioResources[selectedSource][selectedKit]"
+                    :key="sample.id"
+                    :value="index">{{sample.name}}</option>
+          </select>
 
         </div>
         <div class="row-div">
           <div class="btn-holder">
             <!-- THIS IS THE BUTTON!!!!!!!!!!!!!! -->
-            <div class="btn" v-on:click="tryLoadInstrument">
+            <div class="btn"
+                 v-on:click="tryLoadInstrument">
               Assign
+            </div>
+            <div class="btn"
+                 v-on:click="loadRandom">
+              Random
             </div>
           </div>
         </div>
@@ -102,11 +119,10 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>
-  /* CSS */
+/* CSS */
   .container {
     /* height: 15em; */
     max-width: 25em;
@@ -179,5 +195,4 @@
     transition: all 0.25 ease-in-out;
     flex-grow: 1;
   }
-
 </style>
