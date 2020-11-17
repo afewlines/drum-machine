@@ -1,6 +1,5 @@
 <script>
-
-  // import components that do things
+// import components that do things
   import PlusMinusButtons from '@/components/PlusMinusButtons.vue';
   import CreateDeleteButtons from '@/components/CreateDeleteButtons.vue';
   import TransportButtons from '@/components/TransportButtons.vue';
@@ -27,24 +26,24 @@
       trackSel: {
         // THIS ONE GOES BOTH WAYS
         // isn't this cool????
-        get: function() {
+        get: function () {
           // get index of selected track
           return this.$parent.selectedTrack;
         },
-        set: function(x) {
+        set: function ( x ) {
           // try to set index of selected track
-          this.$emit('try-set', { mode: 'track', value: x });
+          this.$emit( 'try-set', { mode: 'track', value: x } );
         },
       },
       patternSel: {
         // another 2-way
-        get: function() {
+        get: function () {
           // get index of selected pattern
           return this.$parent.selectedPattern;
         },
-        set: function(x) {
+        set: function ( x ) {
           // try to set index of selected pattern
-          this.$emit('try-set', { mode: 'pattern', value: x });
+          this.$emit( 'try-set', { mode: 'pattern', value: x } );
         },
       },
       tracksCount() {
@@ -65,40 +64,40 @@
       previewRows() {
         // all rows that can be displayed
         let out = [];
-        for (let i = 0; i < this.tracksCount; i++) {
-          if (i + this.offset < this.tracksCount) {
-            if (this.tracksAll[i + this.offset].activePattern >= 0) {
-              out.push(this.tracksAll[i + this.offset]);
+        for ( let i = 0; i < this.tracksCount; i++ ) {
+          if ( i + this.offset < this.tracksCount ) {
+            if ( this.tracksAll[ i + this.offset ].activePattern >= 0 ) {
+              out.push( this.tracksAll[ i + this.offset ] );
             }
           }
         }
         return out;
       },
       phspot() {
-        return this.$parent.stopped
-          ? 0
-          : (100 * this.$parent.transportLoopSpot) /
-              this.$parent.transportLoopDuration;
+        return this.$parent.stopped ?
+          0 :
+          ( 100 * this.$parent.transportLoopSpot ) /
+          this.$parent.transportLoopDuration;
       },
     },
     methods: {
-      range(num){
-        return Array.from(new Array(num), (x, i) => i);
+      range( num ) {
+        return Array.from( new Array( num ), ( x, i ) => i );
       }
     },
   };
-
 </script>
 
 <template>
-
-  <div class="container">
+<div class="container">
     <div class="panel">
       <!-- LEFT, INFORMATION/TRANSPORT COLUMN -->
-      <div id="info" class="column w25">
+      <div id="info"
+           class="column w25">
         <div style="flex-flow: row; height: 6em;">
           <!-- TRACK -->
-          <div class="box arrows" style="float: left; margin-left: 0.75em;">
+          <div class="box arrows"
+               style="float: left; margin-left: 0.75em;">
             <h3 style="left: -1.35em;">TRACK</h3>
             <input type="number"
                    id="strack"
@@ -109,7 +108,8 @@
             <CreateDeleteButtons mode="track" />
           </div>
           <!-- PATTERN -->
-          <div class="box arrows" style="float: right; margin-right: 0.75em;">
+          <div class="box arrows"
+               style="float: right; margin-right: 0.75em;">
             <h3 style="right: -1.35em;">PATTERN</h3>
             <input v-if="patternCount>0"
                    type="number"
@@ -126,7 +126,8 @@
         </div>
       </div>
       <!-- CENTER, PREVIEW COLUMN -->
-      <div id="preview" class="column w50">
+      <div id="preview"
+           class="column w50">
         <!-- ROWS -->
         <transition-group name="row-track"
                           tag="div"
@@ -137,11 +138,14 @@
                :class="'row-track-item'+((track.id==trackReal.id)?' highlighted':'')">
             <!-- ELEMENTS -->
             <div class="details">
-              <div class="detail-box" style="top: 0;">{{track.activePattern}}</div>
+              <div class="detail-box"
+                   style="top: 0;">{{track.activePattern}}</div>
               <div class="detail-dot">-</div>
-              <div class="detail-box" style="bottom: 0; font-size: 0.5em;">{{track.patternCount-1}}</div>
+              <div class="detail-box"
+                   style="bottom: 0; font-size: 0.5em;">{{track.patternCount-1}}</div>
             </div>
-            <transition-group name="list-blocks"
+            <transition-group v-if="['graphical', 'master'].includes(track.pattern.type)"
+                              name="list-blocks"
                               tag="div"
                               class="row-block-div">
               <div v-for="iel in range(track.pattern.divisions)"
@@ -149,29 +153,44 @@
                    :class="'row-block'+(track.pattern.triggers[iel]>0?' on':'')">
               </div>
             </transition-group>
+
+            <transition-group v-if="track.pattern.type=='midi'"
+                              name="list-blocks"
+                              tag="div"
+                              class="row-line-div">
+              <div v-for="(iel) in track.pattern.timedTriggers"
+                   :key="iel+1"
+                   :style="`left: ${iel*100}%`"
+                   class="row-line">
+              </div>
+            </transition-group>
           </div>
         </transition-group>
         <!-- PLAYHEAD -->
         <div class="playhead-area">
-          <div class="playhead" :style="`left: ${this.phspot}%;`"> </div>
+          <div class="playhead"
+               :style="`left: ${this.phspot}%;`"> </div>
         </div>
       </div>
       <!-- RIGHT, EYECANDY COLUMN -->
-      <div id="eyecandy" class="column w25">
+      <div id="eyecandy"
+           class="column w25">
         <div class="box info">
           <!-- <span v-if="Epage==0">Test message.</span> -->
           <!-- <span v-if="Epage==1">Test message should not be present.</span> -->
           <span style="right: 100em;">INSTRUMENT</span>
           <div v-if="trackReal.instrument!=null">
-            <div class="number" style="font-size: .8em;" id="instPanel">
+            <div class="number"
+                 style="font-size: .8em;"
+                 id="instPanel">
               {{trackReal.instrument.source}}
               {{trackReal.instrument.kit}}
               {{trackReal.instrument.name}}
             </div>
             <!-- <div class="btn" -->
-                 <!-- style="left: 0;" -->
-                 <!-- v-on:click="Epage = ((Epage+1)%2)"> -->
-              <!-- S -->
+            <!-- style="left: 0;" -->
+            <!-- v-on:click="Epage = ((Epage+1)%2)"> -->
+            <!-- S -->
             <!-- </div> -->
           </div>
         </div>
@@ -180,11 +199,10 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>
-
+/* css */
   .container {
     /* height: 15em; */
     max-width: 50em;
@@ -363,6 +381,19 @@
     transition: transform 1s;
   }
 
+  .row-line-div {
+    flex-grow: 1;
+    display: flex;
+  }
+
+  .row-line {
+    position: relative;
+    width: 0.125em;
+    background-color: rgb(0, 0, 0);
+    transition: all 0.25 ease-in-out;
+    flex-grow: 0;
+  }
+
   .details {
     display: flex;
     flex-grow: 0;
@@ -426,5 +457,4 @@
     line-height: 10em;
     text-align: center;
   }
-
 </style>

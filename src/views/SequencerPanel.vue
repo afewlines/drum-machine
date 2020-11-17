@@ -1,6 +1,5 @@
 <script>
-
-  // import ui components
+// import ui components
   import PlusMinusButtons from '@/components/PlusMinusButtons.vue';
 
   // import our classes
@@ -39,51 +38,50 @@
       //    while playing, so uh just don't.
 
       triggerSel: {
-        get: function() {
+        get: function () {
           //if (this.track.activePattern >= 0){
           return this.$parent.triggers;
         },
-        set: function(x) {
-          this.$emit('try-set', { mode: 'triggers', value: x });
+        set: function ( x ) {
+          this.$emit( 'try-set', { mode: 'triggers', value: x } );
         },
       },
       masterBPM: {
-        get: function() {
+        get: function () {
           //return this.$parent.bpm;
           return this.$parent.masterPattern.bpm;
         },
-        set: function(x) {
-          if (x > 0) {
+        set: function ( x ) {
+          if ( x > 0 ) {
             this.$parent.masterPattern.bpm = x;
           }
         },
       },
       patternDivisions: {
-        get: function() {
+        get: function () {
           // get index of selected track
-          if (this.activeTrackHasPattern){
+          if ( this.activeTrackHasPattern ) {
             return this.activePattern.divisions;
-          }
-          else{
+          } else {
             return 0;
           }
         },
-        set: function(x) {
+        set: function ( x ) {
           // try to set index of selected track
-          if (x > 0){
+          if ( x > 0 ) {
             this.activePattern.divisions = x;
             this.activePattern.updateTime();
           }
         },
       },
       patternSel: {
-        get: function() {
+        get: function () {
           // get index of selected pattern
           return this.$parent.selectedPattern;
         },
-        set: function(x) {
+        set: function ( x ) {
           // try to set index of selected pattern
-          this.$emit('try-set', { mode: 'pattern', value: x });
+          this.$emit( 'try-set', { mode: 'pattern', value: x } );
         },
       },
       activeTrack() {
@@ -99,39 +97,38 @@
         return this.activeTrack.pattern;
       },
       activeDivisions() {
-        return Array.from(new Array(this.activePattern.divisions), (x, i) => i);
+        return Array.from( new Array( this.activePattern.divisions ), ( x, i ) => i );
       },
     },
     methods: {
       // functions go here
-      toggleTrigger(index) {
-        console.log(`trigger ${index} times`);
-        this.activePattern.toggleTrigger(index);
+      toggleTrigger( index ) {
+        console.log( `trigger ${index} times` );
+        this.activePattern.toggleTrigger( index );
       },
-      tryChange(mode, inc) {
-        switch (mode) {
-          case 'divisions':
-            this.patternDivisions += inc;
-            return true;
-          case 'bpm':
-            this.masterBPM += inc;
-            return true;
-          default:
-            break;
+      tryChange( mode, inc ) {
+        switch ( mode ) {
+        case 'divisions':
+          this.patternDivisions += inc;
+          return true;
+        case 'bpm':
+          this.masterBPM += inc;
+          return true;
+        default:
+          break;
         }
         return false;
       },
     },
   };
-
 </script>
 
 <template>
-
-  <div class="container">
+<div class="container">
     <div class="panel">
       <!-- LEFT, INFO COLUMN -->
-      <div id="info" class="column w25">
+      <div id="info"
+           class="column w25">
         <!-- TRACK -->
         <div class="box arrows">
           <h3 style="left: -1.35em;">DIVISIONS</h3>
@@ -145,7 +142,8 @@
                             :local="true" />
         </div>
         <!-- PATTERN -->
-        <div class="box arrows" v-if="activeTrack.type == trackTypes.MASTER">
+        <div class="box arrows"
+             v-if="activeTrack.type == trackTypes.MASTER">
           <h3 style="right: -1.35em;">BPM</h3>
           <input type="number"
                  class="number"
@@ -158,9 +156,10 @@
         </div>
       </div>
       <!-- RIGHT, SEQUENCER COLUMN -->
-      <div id="preview" class="column w75">
+      <div id="preview"
+           class="column w75">
         <!-- ELEMENTS -->
-        <transition-group v-if="activeTrackHasPattern"
+        <transition-group v-if="activeTrackHasPattern && activePattern.type != 'midi'"
                           name="list-blocks"
                           tag="div"
                           class="row-block-div">
@@ -170,16 +169,20 @@
                :class="'row-block'+(activeTrack.pattern.triggers[iel]>0?' on':'')">
           </div>
         </transition-group>
+        <div v-else
+             class="row-block-div">
+          <div class="show">
+            Graphical Sequencer Disabled
+          </div>
+        </div>
 
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>
-
-  .container {
+.container {
     /* height: 15em; */
     max-width: 50em;
     margin: auto;
@@ -278,6 +281,14 @@
     flex-direction: row;
   }
 
+  .row-block-div>.show {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
   .row-block {
     background-clip: content-box;
     padding: 0.125em;
@@ -304,5 +315,4 @@
   .list-blocks-move {
     transition: transform 1s;
   }
-
 </style>
