@@ -259,7 +259,7 @@
     <MainPanel ref="main" />
     <div id="nav">
       [
-      <router-link to="/Instrument">Instrument</router-link>] [
+      <router-link to="/Instrument" id="InstRoute">Instrument</router-link>] [
       <router-link to="/Sequencer">Sequencer</router-link>] [
       <router-link to="/Mixing">Mixing</router-link>]
     </div>

@@ -21,8 +21,44 @@
     },
     mounted() {
       // what happens when it loads goes here
+      let persistentVars = [ 'selectedSource', 'selectedKit', 'selectedSample' ];
+      for ( let varName of persistentVars ) {
+        if ( !( localStorage[ varName ] ) ) {
+          localStorage[ varName ] = "";
+        }
+        this[ varName ] = localStorage[ varName ];
+      }
     },
     computed: {
+
+      modelSource: {
+        get: function() {
+          return this.selectedSource;
+        },
+        set: function(x) {
+          localStorage.modelSource = x;
+          this.selectedSource = x;
+        },
+      },
+      modelKit: {
+        get: function() {
+          return this.selectedKit;
+        },
+        set: function(x) {
+          localStorage.modelKit = x;
+          this.selectedKit = x;
+        },
+      },
+      modelSample: {
+        get: function() {
+          return this.selectedSample;
+        },
+        set: function(x) {
+          localStorage.modelSample = x;
+          this.selectedSample = x;
+        },
+      },
+
       activeTrack() {
         // current track object
         return this.$parent.track;
@@ -43,6 +79,7 @@
         if (this.selectedSource =="" || this.selectedKit == "" || this.selectedSample == "") {
           return false;
         }
+
         console.log(this.audioResources[this.selectedSource][this.selectedKit]);
         switch (this.activeTrack.type) {
           case this.trackTypes.MASTER:
@@ -71,20 +108,23 @@
         <!-- ELEMENTS -->
         <div class="row-div">
             <select class="row-el"
-                    v-model="selectedSource">
+                    id="source1"
+                    v-model="modelSource">
                    <option v-for="source in Object.keys(audioResources)"
                    :key="source">{{source}}</option>
             </select>
-            <select v-if="selectedSource!=''"
+            <select v-if="modelSource!=''"
                     class="row-el"
-                    v-model="selectedKit">
-                   <option v-for="kit in Object.keys(audioResources[selectedSource])"
+                    id="source2"
+                    v-model="modelKit">
+                   <option v-for="kit in Object.keys(audioResources[modelSource])"
                    :key="kit">{{kit}}</option>
             </select>
-            <select v-if="selectedKit!=''"
+            <select v-if="modelKit!=''"
                     class="row-el"
-                    v-model="selectedSample">
-                   <option v-for="(sample, index) in audioResources[selectedSource][selectedKit]"
+                    id="source3"
+                    v-model="modelSample">
+                   <option v-for="(sample, index) in audioResources[modelSource][modelKit]"
                    :key="sample.id"
                    :value="index">{{sample.name}}</option>
             </select>
@@ -93,7 +133,7 @@
         <div class="row-div">
           <div class="btn-holder">
             <!-- THIS IS THE BUTTON!!!!!!!!!!!!!! -->
-            <div class="btn" v-on:click="tryLoadInstrument">
+            <div class="btn" v-on:click="tryLoadInstrument" id="assignButton">
               Assign
             </div>
           </div>

@@ -103,7 +103,7 @@
                    style="font-size: 2.5em;"
                    v-model.lazy.number="trackSel">
             <PlusMinusButtons mode="track" />
-            <CreateDeleteButtons mode="track" id="steeze" />
+            <CreateDeleteButtons mode="track" />
           </div>
           <!-- PATTERN -->
           <div class="box arrows" style="float: right; margin-right: 0.75em;">
