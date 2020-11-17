@@ -1,4 +1,4 @@
-import { MasterSequencer, GraphicalSequencer } from '@/js/SequencerClasses.js'
+import { MasterSequencer, GraphicalSequencer, MIDISequencer } from '@/js/SequencerClasses.js'
 
 const TrackTypes = {
   // cheeky js enum
@@ -19,6 +19,12 @@ class Track {
   get pattern() {
     // get the active pattern
     return this.patterns[this.activePattern];
+  }
+
+  set pattern(x) {
+    // set current pattern
+    this.patterns.splice(this.activePattern, 1);
+    this.patterns.splice(this.activePattern, 0, x);
   }
 
   get patternCount() {
@@ -46,7 +52,7 @@ class Track {
   newPattern() {
     // make-a da baby (random)
     // TODO: make not random, make work right
-    this.patterns.push(new GraphicalSequencer(3 + Math.floor(Math.random() * 12)));
+    this.patterns.push(new GraphicalSequencer(MasterTrack.pattern.divisions));
     this.activePattern = this.patterns.length - 1;
     this.pattern.updateTime();
     return true;
@@ -66,12 +72,6 @@ class Track {
     return false;
   }
 
-  updateTime(length) {
-    if (this.activePattern >= 0) {
-      this.pattern.updateTime(length);
-    }
-  }
-
 }
 
 // TODO: also this bad boy
@@ -89,6 +89,19 @@ class MIDITrack extends Track {
     document.getElementById("audio_bin")
       .append(this.instrument.load_sample());
     //return this.instrument.load_sample());
+  }
+  swapActivePatternType() {
+    console.log(this.pattern.type);
+    switch (this.pattern.type) {
+      case "graphical":
+        this.pattern = new MIDISequencer(this.pattern.divisions);
+        break;
+      case "midi":
+        this.pattern = new GraphicalSequencer(this.pattern.divisions);
+        break;
+      default:
+
+    }
   }
   playAt(last, next) {
     if (this.instrument != null && this.activePattern >= 0 && this.pattern.playAt(last, next)) {
@@ -148,9 +161,6 @@ const MasterTrack = {
       this.activePattern = -1;
       return true;
     }
-    return false;
-  },
-  updateTime(length) {
     return false;
   },
   playAt() {},

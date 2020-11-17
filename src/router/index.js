@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 import About from '../views/About.vue'
 import SequencerPanel from '../views/SequencerPanel.vue'
 import InstrumentPanel from '../views/InstrumentPanel.vue'
+import MIDIPanel from '../views/MIDIPanel.vue'
 
 Vue.use(VueRouter)
 
@@ -18,6 +19,10 @@ const routes = [{
   path: '/Sequencer',
   name: 'Sequencer',
   component: SequencerPanel
+}, {
+  path: '/MIDI',
+  name: 'MIDI',
+  component: MIDIPanel
 }, {
   path: '/Mixing',
   name: 'Mixing',
