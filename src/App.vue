@@ -261,6 +261,7 @@
       [
       <router-link to="/Instrument">Instrument</router-link>] [
       <router-link to="/Sequencer">Sequencer</router-link>] [
+      <router-link to="/MIDI">MIDI</router-link>] [
       <router-link to="/Mixing">Mixing</router-link>]
     </div>
     <router-view />
