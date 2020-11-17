@@ -22,6 +22,10 @@ class MIDIInterface {
   }
 
   start(accessPromise, prompt) {
+    if (this.access != null) {
+      return;
+    }
+
     // REQUEST MIDI ACCESS, STORE DATA ON PROMISE FULFILL
     accessPromise.then(function(access) {
       // SET MIDI DATA VARS

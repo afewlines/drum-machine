@@ -112,6 +112,7 @@
                style="float: right; margin-right: 0.75em;">
             <h3 style="right: -1.35em;">PATTERN</h3>
             <input v-if="patternCount>0"
+                   id="patternDisplay"
                    type="number"
                    class="number"
                    style="font-size: 2.5em;"
