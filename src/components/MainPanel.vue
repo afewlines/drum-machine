@@ -163,7 +163,7 @@
           <!-- <span v-if="Epage==1">Test message should not be present.</span> -->
           <span style="right: 100em;">INSTRUMENT</span>
           <div v-if="trackReal.instrument!=null">
-            <div class="number" style="font-size: .8em;">
+            <div class="number" style="font-size: .8em;" id="instPanel">
               {{trackReal.instrument.source}}
               {{trackReal.instrument.kit}}
               {{trackReal.instrument.name}}

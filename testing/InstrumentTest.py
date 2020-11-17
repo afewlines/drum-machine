@@ -17,10 +17,5 @@ with webdriver.Chrome() as driver:
     s3 = Select(driver.find_element_by_id("source3"))
     s3.select_by_index(random.randint(0,len(s3.options)-1))
     driver.find_element_by_id("assignButton").click()
-    input()
-    after = driver.find_element_by_id("strack")
-    after = after.get_attribute('value')
-    if (before == '0' and after == '1'):
-        print("Success! Before track was clicked, track was", before,", after track was clicked, track is", after)
-    else:
-        print("failure")
+    res = driver.find_element_by_id("instPanel").text
+    assert len(res) > 0
