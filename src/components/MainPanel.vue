@@ -18,9 +18,12 @@
         // for pagination of high track #
         zoom: 5,
         offset: 0,
+        Epage: 0,
       };
     },
     computed: {
+
+
       trackSel: {
         // THIS ONE GOES BOTH WAYS
         // isn't this cool????
@@ -154,7 +157,25 @@
       </div>
       <!-- RIGHT, EYECANDY COLUMN -->
       <div id="eyecandy" class="column w25">
-        EYECANDY
+        <div class="box info">
+          <!-- <span v-if="Epage==0">Test message.</span> -->
+          <!-- <span v-if="Epage==1">Test message should not be present.</span> -->
+          <span style="right: 100em;">INSTRUMENT</span>
+          <div v-if="trackReal.instrument!=null">
+            <div class="number" style="font-size: .8em;">
+              {{trackReal.instrument.source}}
+              {{trackReal.instrument.kit}}
+              {{trackReal.instrument.name}}
+            </div>
+            <!-- <div class="btn" -->
+                 <!-- style="left: 0;" -->
+                 <!-- v-on:click="Epage = ((Epage+1)%2)"> -->
+              <!-- S -->
+            <!-- </div> -->
+          </div>
+        </div>
+
+
       </div>
     </div>
   </div>
@@ -228,6 +249,15 @@
     margin-bottom: 1.75em;
   }
 
+  .box.info {
+    display: flex;
+    /* position: static; */
+    flex-grow: 1;
+    width: 50%;
+    /* height: 50%; */
+    margin: 2.5em 2.5em;
+  }
+
   .number {
     position: absolute;
     height: min-content;
@@ -243,6 +273,10 @@
     text-align: center;
     text-shadow: 0 0 0.25em black;
     color: rgb(136, 136, 136);
+  }
+
+  .number.string {
+    width: 150%;
   }
 
   #info {
@@ -375,6 +409,14 @@
     /* box-shadow: 0 0 0.25em 2px rgba(48, 48, 48, 0.5); */
     background-color: rgb(48, 48, 48);
     z-index: -1;
+  }
+
+  .btn {
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    margin: 0.25em 0;
+    line-height: 1em;
   }
 
   /* EYECANDY FORMATTING */

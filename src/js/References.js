@@ -1,9 +1,11 @@
 class DrumSample {
-  constructor(path) {
+  constructor(path, kit, source) {
     this.id = DrumSample.count++;
     this.path = path;
     this.name = path.split('/');
     this.name = this.name[this.name.length - 1];
+    this.source = source;
+    this.kit = kit;
     this.element = null;
   }
   load_sample() {
@@ -34,7 +36,7 @@ function registerDrumSample(source, kit, sample) {
     audios[source][kit] = [];
   }
 
-  audios[source][kit].push(new DrumSample(sample));
+  audios[source][kit].push(new DrumSample(sample, kit, source));
 }
 
 function registerDrumKit(source, name, samples) {
