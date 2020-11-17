@@ -23,11 +23,13 @@
 
   <div class="btn-holder">
     <div class="btn"
+         :id = "`del${mode}`"
          style="left: 0; margin-left:1.25em;"
          v-on:click="del">
       &#x2715;
     </div>
     <div class="btn"
+         :id = "`create${mode}`"
          style="right: 0; margin-right:1.25em;"
          v-on:click="create">
       &#x2739;

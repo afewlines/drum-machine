@@ -98,11 +98,12 @@
           <div class="box arrows" style="float: left; margin-left: 0.75em;">
             <h3 style="left: -1.35em;">TRACK</h3>
             <input type="number"
+                   id="strack"
                    class="number"
                    style="font-size: 2.5em;"
                    v-model.lazy.number="trackSel">
             <PlusMinusButtons mode="track" />
-            <CreateDeleteButtons mode="track" />
+            <CreateDeleteButtons mode="track" id="steeze" />
           </div>
           <!-- PATTERN -->
           <div class="box arrows" style="float: right; margin-right: 0.75em;">
