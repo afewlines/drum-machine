@@ -83,12 +83,11 @@
         }
       },
       startRecording() {
-        // this.$parent.transport.start( () => this.record( true ) );
-        this.$parent.transport.start();
+        this.$parent.transport.start( () => this.record( true ) );
         this.midi.midiRecv = this.activePattern.newRecording( this.$parent.transportLoopDuration, this.overdub );
       },
       stopRecording() {
-        // this.$parent.transport.stop();
+        this.$parent.transport.callback = null;
         this.midi.midiRecv = null;
       },
       getActivePatternType() {

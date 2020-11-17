@@ -21,7 +21,7 @@ class MIDIInterface {
     this.output = null;
   }
 
-  start(accessPromise) {
+  start(accessPromise, prompt) {
     // REQUEST MIDI ACCESS, STORE DATA ON PROMISE FULFILL
     accessPromise.then(function(access) {
       // SET MIDI DATA VARS
@@ -30,8 +30,22 @@ class MIDIInterface {
       this.outputs = [...this.access.outputs.values()];
 
       // SELECT INPUT AND OUTPUTS
-      this.input = this.inputs[1];
-      this.output = this.outputs[3];
+
+      let res = -1
+      while (res < 0) {
+        res = prompt(`Select MIDI In: ${this.inputs.map((x)=>x.name).join(", ")}`);
+        res = this.inputs.map((x) => x.name)
+          .indexOf(res);
+      }
+      this.input = this.inputs[res];
+
+      res = -1
+      while (res < 0) {
+        res = prompt(`Select MIDI Out: ${this.inputs.map((x)=>x.name).join(", ")}`);
+        res = this.inputs.map((x) => x.name)
+          .indexOf(res);
+      }
+      this.output = this.outputs[res];
 
       // OPEN OUTPUT STREAM
       this.output.open();

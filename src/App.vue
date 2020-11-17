@@ -225,7 +225,7 @@
           }
         }.bind( this ),
         start: function ( cb = null ) {
-          this.transport.stop()
+          this.transport.stop( false );
           if ( cb != null ) {
             this.callback = cb;
           }
@@ -234,9 +234,9 @@
           this.tick = 0;
           requestAnimationFrame( this.transport.enter )
         }.bind( this ),
-        stop: function () {
+        stop: function ( doCall = true ) {
           this.stopped = true;
-          if ( this.callback != null ) {
+          if ( doCall && this.callback != null ) {
             let cb = this.callback;
             this.callback = null;
             cb();
@@ -269,7 +269,8 @@
       if ( navigator.requestMIDIAccess == undefined ) {
         console.warn( "Browser does not support Web MIDI API" );
       } else {
-        this.midi.start( navigator.requestMIDIAccess() );
+
+        this.midi.start( navigator.requestMIDIAccess(), window.prompt );
       }
     },
   };

@@ -143,7 +143,7 @@
               <div class="detail-box"
                    style="bottom: 0; font-size: 0.5em;">{{track.patternCount-1}}</div>
             </div>
-            <transition-group v-if="track.pattern.type=='graphical'"
+            <transition-group v-if="['graphical', 'master'].includes(track.pattern.type)"
                               name="list-blocks"
                               tag="div"
                               class="row-block-div">
@@ -157,8 +157,8 @@
                               name="list-blocks"
                               tag="div"
                               class="row-line-div">
-              <div v-for="(iel, itr) in track.pattern.timedTriggers"
-                   :key="itr+1"
+              <div v-for="(iel) in track.pattern.timedTriggers"
+                   :key="iel+1"
                    :style="`left: ${iel*100}%`"
                    class="row-line">
               </div>
